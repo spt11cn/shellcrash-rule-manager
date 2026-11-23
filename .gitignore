@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.spec
+build/
+dist/*.old
+*.old
+
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 本地临时文件
+.tmp/
+*.log
