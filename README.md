@@ -29,7 +29,7 @@
 ## 下载
 
 - 本仓库 [`dist/ShellCrashRuleManager.exe`](dist/ShellCrashRuleManager.exe)
-- 或到 [Releases](https://github.com/spt11cn/shellcrash-rule-manager/releases) 取最新版（当前 **v2.0**）
+- 或到 [Releases](https://github.com/spt11cn/shellcrash-rule-manager/releases) 取最新版（当前 **v2.1**）
 
 校验（可选）：
 
@@ -37,7 +37,7 @@
 certutil -hashfile ShellCrashRuleManager.exe SHA256
 ```
 
-v2.0 的 SHA256：`e458157e1aa49fdee2569f20e65823425d865314d4dcb848d61ccf0434289590`
+v2.1 的 SHA256：`81417555a3dd9d05d94c46d8d76ce67f36fd9866973c9853ad4ef5e5819ec84d`
 
 ## 使用
 

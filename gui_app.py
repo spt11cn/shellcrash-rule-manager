@@ -34,7 +34,7 @@ except Exception:  # pragma: no cover
     paramiko = None
 
 APP_NAME = "ShellCrash 规则管理器"
-VERSION = "2.0"
+VERSION = "2.1"
 PORT_BASE = 8801
 TOKEN = secrets.token_urlsafe(18)
 
@@ -164,6 +164,22 @@ def cfg_remember(pwd, on):
             old.pop("pwd_enc", None)
         with open(cfg_path(), "w", encoding="utf-8") as f:
             json.dump(old, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def cfg_drop(*keys):
+    """删掉本地配置里的指定字段（未勾「记住」时清掉上次残留的用户名/密码）。"""
+    try:
+        old = cfg_load()
+        changed = False
+        for k in keys:
+            if k in old:
+                old.pop(k, None)
+                changed = True
+        if changed:
+            with open(cfg_path(), "w", encoding="utf-8") as f:
+                json.dump(old, f, ensure_ascii=False, indent=2)
     except Exception:
         pass
 
@@ -989,10 +1005,13 @@ class Handler(BaseHTTPRequestHandler):
                 SESS["connected"] = False
             try:
                 client = ssh_connect(host, user, pwd)
-                cfg_save({"host": host, "user": user, "sudo_pwd": sudo_pwd})
+                # 只有勾了「记住」才保存用户名和密码；否则清掉上次残留，免得下次打开又被自动填上
                 if body.get("remember"):
+                    cfg_save({"host": host, "user": user, "sudo_pwd": sudo_pwd})
                     cfg_remember(pwd, True)
                 else:
+                    cfg_save({"host": host})
+                    cfg_drop("user", "sudo_pwd")
                     cfg_remember("", False)
                 R = Remote(client, sudo_pwd)
                 with SESS_LOCK:
@@ -1278,13 +1297,14 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
   <h2><span class="n">1</span>连接设备（飞牛 NAS / OpenWrt）</h2>
   <div class="row">
     <label>IP</label><input type="text" id="host" placeholder="192.168.1.100">
-    <label>用户名</label><input type="text" id="user" placeholder="spt11cn">
+    <label>用户名</label><input type="text" id="user" placeholder="如 root">
     <label>密码</label><input type="password" id="pwd" autocomplete="current-password">
-    <label class="chk"><input type="checkbox" id="remember"> 记住</label>
+    <label class="chk" title="勾选后下次打开自动填入用户名和密码；不勾则不保存"><input type="checkbox" id="remember"> 记住</label>
     <button id="btnConn" onclick="doConnect()">连接</button>
     <button class="ghost" id="btnDisc" onclick="doDisconnect()" style="display:none">断开</button>
   </div>
   <div class="msg" id="connMsg"></div>
+  <div class="muted" style="margin-top:8px">未勾选「记住」时不会保存用户名和密码，下次打开是空白。</div>
   <div class="muted" style="margin-top:8px">sudo 密码默认与登录密码相同；如不同请在这里填写：</div>
   <div class="row" style="margin-top:6px"><input type="password" id="sudoPwd" placeholder="留空 = 同登录密码" style="max-width:220px"></div>
 </div>
